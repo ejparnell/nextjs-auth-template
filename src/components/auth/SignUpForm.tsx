@@ -4,7 +4,6 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { signUpSchema } from '@/schemas/user';
 import { zodToFormErrors } from '@/lib/zodToFormErrors';
-import { signIn } from 'next-auth/react';
 
 export default function SignUpForm() {
     const [fields, setFields] = useState({
@@ -17,6 +16,7 @@ export default function SignUpForm() {
         {}
     );
     const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
     const router = useRouter();
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -48,14 +48,25 @@ export default function SignUpForm() {
             return;
         }
 
-        await signIn('credentials', {
-            redirect: false,
-            email: fields.email,
-            password: fields.password,
-            callbackUrl: '/dashboard',
-        });
+        setSubmitted(true);
+        setLoading(false);
+    }
 
-        router.push('/dashboard');
+    if (submitted) {
+        return (
+            <div>
+                <h2>Almost there!</h2>
+                <p>
+                    We’ve sent a verification link to{' '}
+                    <strong>{fields.email}</strong>.
+                    <br />
+                    Click the link to activate your account.
+                </p>
+                <button onClick={() => router.push('/signin')}>
+                    Back to sign‑in
+                </button>
+            </div>
+        );
     }
 
     return (

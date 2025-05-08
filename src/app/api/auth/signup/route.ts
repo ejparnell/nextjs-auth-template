@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { signUpSchema } from '@/schemas/user';
 import { dbConnect } from '@/lib/dbConnect';
 import { User } from '@/models/User';
+import { createAndSendVerification } from '@/lib/email/sendVerificationEmail';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -25,7 +26,9 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    await new User({ name, email, password }).save();
+    const user = await new User({ name, email, password }).save();
+
+    await createAndSendVerification(user.id, email);
 
     return NextResponse.json({ ok: true }, { status: 201 });
 }

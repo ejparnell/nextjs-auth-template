@@ -5,5 +5,7 @@ export default withAuth({
 });
 
 export const config = {
-    matcher: ['/((?!auth|signin|signup|logout|_next/static|_next/image).*)'],
+    matcher: [
+        '/((?!auth|signin|signup|api/verify-email|logout|_next/static|_next/image).*)',
+    ],
 };

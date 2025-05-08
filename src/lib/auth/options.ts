@@ -19,6 +19,9 @@ export function buildAuthOptions(): NextAuthOptions {
                         '+password'
                     );
                     if (!user) return null;
+                    if (!user.emailVerified) {
+                        throw new Error('Email not verified');
+                    }
                     const ok = await bcrypt.compare(password, user.password);
                     if (!ok) return null;
                     return { id: user.id, name: user.name, email: user.email };
