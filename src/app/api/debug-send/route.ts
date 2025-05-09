@@ -10,7 +10,6 @@ export async function GET() {
             subject: 'Ping from template',
             text: 'Hello world',
         });
-        console.log('Resend data', data);
         return NextResponse.json({ ok: true });
     } catch (err) {
         console.error('Resend error', err);

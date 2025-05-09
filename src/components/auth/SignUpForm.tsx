@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Turnstile from 'react-turnstile';
 import { signUpSchema } from '@/schemas/user';
 import { zodToFormErrors } from '@/lib/zodToFormErrors';
 
@@ -11,6 +12,7 @@ export default function SignUpForm() {
         email: '',
         password: '',
         confirmPassword: '',
+        turnstileToken: '',
     });
     const [errors, setErrors] = useState<Record<string, string | undefined>>(
         {}
@@ -105,10 +107,17 @@ export default function SignUpForm() {
             />
             {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
 
+            <Turnstile
+                sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY!}
+                onSuccess={(token) =>
+                    setFields((f) => ({ ...f, turnstileToken: token }))
+                }
+            />
+
             {errors.global && <p>{errors.global}</p>}
 
-            <button disabled={loading}>
-                {loading ? 'Creating account…' : 'Sign Up'}
+            <button disabled={loading || !fields.turnstileToken}>
+                {loading ? 'Creating…' : 'Sign Up'}
             </button>
         </form>
     );

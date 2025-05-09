@@ -1,18 +1,19 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Turnstile from 'react-turnstile';
 import { requestResetSchema } from '@/schemas/password';
 import { zodToFormErrors } from '@/lib/zodToFormErrors';
 
 export default function RequestResetForm() {
-    const [email, setEmail] = useState('');
+    const [form, setForm] = useState({ email: '', turnstileToken: '' });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        const parsed = requestResetSchema.safeParse({ email });
+        const parsed = requestResetSchema.safeParse({ email: form.email });
         if (!parsed.success) {
             setErrors(zodToFormErrors(parsed.error));
             return;
@@ -22,34 +23,38 @@ export default function RequestResetForm() {
         await fetch('/api/auth/request-password-reset', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify(form),
         });
         setLoading(false);
         setSent(true);
     }
 
-    if (sent) {
+    if (sent)
         return (
             <p>
-                Check <strong>{email}</strong> for a reset link.
+                Check <strong>{form.email}</strong> for a reset link.
             </p>
         );
-    }
 
     return (
         <form onSubmit={handleSubmit}>
             <input
-                name='email'
                 type='email'
                 placeholder='Email'
-                value={email}
+                value={form.email}
                 onChange={(e) => {
-                    setEmail(e.target.value);
+                    setForm({ ...form, email: e.target.value });
                     setErrors({});
                 }}
             />
             {errors.email && <p>{errors.email}</p>}
-            <button disabled={loading}>
+
+            <Turnstile
+                sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY!}
+                onSuccess={(t) => setForm((f) => ({ ...f, turnstileToken: t }))}
+            />
+
+            <button disabled={loading || !form.turnstileToken}>
                 {loading ? 'Sending…' : 'Send reset link'}
             </button>
         </form>

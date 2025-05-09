@@ -12,6 +12,7 @@ export async function createAndSendVerification(userId: string, email: string) {
     await new VerificationToken({
         userId,
         tokenHash,
+        kind: 'email',
         expiresAt: new Date(Date.now() + 15 * 60 * 1_000),
     }).save();
 
