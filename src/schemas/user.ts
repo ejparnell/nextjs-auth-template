@@ -1,11 +1,12 @@
 import { z } from 'zod';
+import { passwordSchema } from './password';
 
 export const signUpSchema = z
     .object({
         name: z.string().min(2),
         email: z.string().email(),
-        password: z.string().min(6),
-        confirmPassword: z.string().min(6),
+        password: passwordSchema,
+        confirmPassword: passwordSchema,
     })
     .refine((d) => d.password === d.confirmPassword, {
         message: 'Passwords must match',
@@ -14,5 +15,5 @@ export const signUpSchema = z
 
 export const signInSchema = z.object({
     email: z.string().email(),
-    password: z.string().min(6),
+    password: passwordSchema,
 });
